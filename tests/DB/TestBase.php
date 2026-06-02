@@ -9,9 +9,10 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\EntityManagerInterface;
 
+use Doctrine\ORM\Tools\SchemaTool;
 use PHPUnit\Framework\TestCase;
 
-class BaseTest extends TestCase
+class TestBase extends TestCase
 {
     private string $dbName;
 
@@ -34,28 +35,41 @@ class BaseTest extends TestCase
             'driver'   => 'pdo_mysql',
         ];
 
-        $connection = DriverManager::getConnection($params);
+        $tmpConnection = DriverManager::getConnection($params);
 
-        $connection->executeStatement(
+        $tmpConnection->executeStatement(
             sprintf('CREATE DATABASE `%s`', $this->dbName)
         );
 
+        $newParams = array_merge($params, ['dbname' => $this->dbName]);
+        $newConnection = DriverManager::getConnection($newParams);
 
-        $this->entityManager = new EntityManager($connection,$config);
+        $this->entityManager = new EntityManager($newConnection,$config);
 
         // Reconfigure Doctrine to use $this->dbName
         // Then create schema here
+
+        $schemaTool = new SchemaTool($this->entityManager);
+
+        $metadata = $this->entityManager
+            ->getMetadataFactory()
+            ->getAllMetadata();
+
+        $schemaTool->createSchema($metadata);
+
+        $emConnection = $this->entityManager->getConnection();
+
+        $tables = $emConnection->fetchFirstColumn('SHOW TABLES');
+
+        dump($tables);
     }
 
     protected function tearDown(): void
     {
-
         $connection = $this->entityManager->getConnection();
-
         $connection->executeStatement(
             sprintf('DROP DATABASE IF EXISTS `%s`', $this->dbName)
         );
-
         $connection->close();
 
         parent::tearDown();

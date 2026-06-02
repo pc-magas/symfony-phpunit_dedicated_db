@@ -3,7 +3,7 @@
 declare(strict_types=1);
 use App\Infrastructure\Repository\BaseRepository;
 
-class DummyEntityRepository extends BaseRepository
+final readonly class DummyEntityRepository extends BaseRepository
 {
 
 }
