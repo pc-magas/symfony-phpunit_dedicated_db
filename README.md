@@ -33,7 +33,22 @@ services:
     env_file: env/mysql_maria.env
     volumes:
       - ./volumes/db:/var/lib/mysql
+      - ./provision/db/maria/allow_user_to_create_db.sh:/docker-entrypoint-initdb.d/allow_user_to_create_db.sh
 ```
+
+Afterwards Create the script `./provision/db/maria/allow_user_to_create_db.sh` with the following content:
+
+```bash
+#!/usr/bin/env bash
+
+echo "Allow mysql user $MYSQL_USER to create seperate db:"
+docker_process_sql -uroot -p"$MYSQL_ROOT_PASSWORD" <<-EOSQL
+    GRANT CREATE, DROP ON *.* TO '$MYSQL_USER'@'%';
+    FLUSH PRIVILEGES;
+EOSQL
+```
+
+The script allows to create a separate database for testing purposes, which is useful to avoid conflicts with the main database used in development or production. The script grants the necessary permissions to the MySQL user specified in the `env/mysql_maria.env` file, allowing it to create and drop databases as needed for testing.
 
 If upon `env/mysql_maria.env` contain:
 
