@@ -2,7 +2,7 @@
 
 namespace App\Tests\DB;
 
-class RunTestBaseTest extends  \PHPUnit\Framework\TestCase
+class RunTestBaseTest extends TestBase
 {
     public function testRun()
     {
