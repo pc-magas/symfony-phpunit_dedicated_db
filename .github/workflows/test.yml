@@ -1,0 +1,52 @@
+name: Tests
+
+on:
+    push:
+    pull_request:
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        services:
+            mariadb:
+                image: mariadb:11
+                env:
+                    MARIADB_ROOT_PASSWORD: root
+                    MARIADB_DATABASE: testdb
+                    MARIADB_USER: symfonyusr
+                    MARIADB_PASSWORD: symfonyusr
+                ports:
+                    - 3306:3306
+                options: >-
+                    --health-cmd="mariadb-admin ping -h localhost -ptestpass --silent"
+                    --health-interval=10s
+                    --health-timeout=5s
+                    --health-retries=10
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            -   name: Map test_db to localhost
+                run: |
+                    echo "127.0.0.1 test_db" | sudo tee -a /etc/hosts
+
+
+            -   name: Grant database creation privileges
+                run: |
+                    mysql -h 127.0.0.1 -uroot -proot <<'SQL'
+                    GRANT CREATE, DROP ON *.* TO 'symfonyusr'@'%';
+                    FLUSH PRIVILEGES;
+                    SQL
+
+            - name: Setup PHP 8.2
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.2
+                  extensions: mbstring, intl, pdo, pdo_mysql, ctype, curl, fileinfo, gd, iconv, imagick, zlib
+                  coverage: none
+
+            - name: Install dependencies
+              run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+
+            - name: Run PHPUnit tests
+              run: vendor/bin/phpunit --testsuite="DB"
