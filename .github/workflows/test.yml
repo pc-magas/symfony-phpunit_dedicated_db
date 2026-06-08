@@ -46,7 +46,7 @@ jobs:
                   coverage: none
 
             - name: Install dependencies
-              run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+              run: composer install --prefer-dist --no-progress --no-interaction
 
             - name: Run PHPUnit tests
               run: ./vendor/bin/phpunit --testsuite="DB"
