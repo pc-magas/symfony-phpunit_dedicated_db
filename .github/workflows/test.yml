@@ -45,17 +45,8 @@ jobs:
                   extensions: mbstring, intl, pdo, pdo_mysql, ctype, curl, fileinfo, gd, iconv, imagick, zlib
                   coverage: none
 
-            - name: List test files
-              run: cat phpunit.xml
-
             - name: Install dependencies
               run: composer install --prefer-dist --no-progress --no-interaction
-
-            - name: List test files
-              run: find tests -type f
-
-            - name: List tests
-              run: ./vendor/bin/phpunit --list-tests
 
             - name: Run PHPUnit tests
               run: ./vendor/bin/phpunit --testsuite="DB"
