@@ -45,6 +45,9 @@ jobs:
                   extensions: mbstring, intl, pdo, pdo_mysql, ctype, curl, fileinfo, gd, iconv, imagick, zlib
                   coverage: none
 
+            - name: List test files
+              run: cat phpunit.xml
+
             - name: Install dependencies
               run: composer install --prefer-dist --no-progress --no-interaction
 
